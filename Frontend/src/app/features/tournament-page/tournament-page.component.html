@@ -1,0 +1,84 @@
+<div class="container py-4">
+
+
+<div class="text-center mb-4 pb-3 border rounded">
+  <h2 class="fw-bold mt-4">Pokémon League</h2>
+  <p class="text-muted">
+    Explore performance statistics from the latest Pokémon <br> 
+    tournament.Sort by different metrics to see who's leading the <br>
+     competition.
+  </p>
+</div>
+
+
+<div class="mb-3 border rounded">
+
+  <div class="row justify-content-center mb-3 mt-3">
+
+    <div class="col-12 col-md-4 text-center">
+      <label class="form-label d-block text-start mx-auto" style="max-width: 250px;">
+        Sort by
+      </label>
+
+      <select [(ngModel)]="sortBy"
+              (change)="changeSort()"
+              class="form-select mx-auto"
+              style="max-width: 250px;">
+        <option *ngFor="let opt of sortOptionsList" [value]="opt">
+          {{ opt | titlecase }}
+        </option>
+      </select>
+    </div>
+
+    <div class="col-12 col-md-4 text-center">
+      <label class="form-label d-block text-start mx-auto" style="max-width: 250px;">
+        Direction
+      </label>
+
+      <select [(ngModel)]="sortDirection"
+              (change)="changeSort()"
+              class="form-select mx-auto"
+              style="max-width: 250px;">
+        <option *ngFor="let dir of sortDirectionList" [value]="dir">
+          {{ directionLabels[dir] }}
+        </option>
+      </select>
+    </div>
+
+  </div>
+
+</div>
+
+
+  <div class="col-12 col-md-2 mb-3 ms-auto text-start">
+      <label class="form-label">Items per page</label>
+      <select [(ngModel)]="pageSize" (change)="changePageSize()" class="form-select">
+        <option *ngFor="let size of [4, 8, 16]" [ngValue]="size">
+          {{ size }}
+        </option>
+      </select>
+    </div>
+
+
+  <div class="row g-4">
+    <div class="col-12 col-sm-6 col-lg-3" *ngFor="let p of pagedTotal">
+      <app-individual-cards [pokemon]="p"></app-individual-cards>
+    </div>
+  </div>
+
+
+  <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+    <button class="btn btn-outline-secondary" (click)="prevPage()">‹ Previous</button>
+
+    <span class="fw-bold">
+      {{ currentPage }} / {{ total.length / pageSize | number:'1.0-0' }}
+    </span>
+
+    <button class="btn btn-outline-secondary" (click)="nextPage()">Next ›</button>
+  </div>
+
+  <p class="text-center text-muted mt-3 small">
+    Data refreshes automatically based on tournament results
+  </p>
+
+</div>

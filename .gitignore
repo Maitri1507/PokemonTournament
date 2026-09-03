@@ -1,0 +1,40 @@
+# .NET build outputs
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+.vscode/
+*.code-workspace
+
+# ASP.NET / .NET generated files
+*.log
+*.pdb
+*.cache
+*.tmp
+*.bak
+
+# Node / Angular
+node_modules/
+dist/
+out-tsc/
+coverage/
+.angular/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+.env
+.env.*
+
+# package-lock.json
