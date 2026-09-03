@@ -31,8 +31,8 @@ public class BattleServiceTests
     [Fact]
     public void FightResult_WhenSecondHasTypeAdvantage_ReturnsSecondWins()
     {
-        var first = CreatePokemon("electric");
-        var second = CreatePokemon("water");
+        var first = CreatePokemon("grass");
+        var second = CreatePokemon("fire");
 
         var result = _service.FightResult(first, second);
 
