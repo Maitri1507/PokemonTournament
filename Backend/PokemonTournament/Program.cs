@@ -1,12 +1,15 @@
 
 
 using PokemonTournament.Infrastructure;
+using PokemonTournament.Models;
 using PokemonTournament.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddOptions<TournamentOptions>()
+    .BindConfiguration("Tournament");
 
 //Since this is a small project, I have added them here for simplicity.
 // In a larger project, I use ServiceCollectionExtensions to register services in a separate class.

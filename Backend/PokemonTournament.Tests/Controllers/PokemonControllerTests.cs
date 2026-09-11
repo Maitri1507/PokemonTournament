@@ -27,6 +27,15 @@ public class PokemonControllerTests
     }
 
     [Fact]
+    public async Task GetTournamentStatistics_WhenSortByIsWhitespace_ReturnsBadRequest()
+    {
+        var result = await _controller.GetTournamentStatistics(" ", null);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal("sortBy parameter is required", GetErrorMessage(badRequest.Value));
+    }
+
+    [Fact]
     public async Task GetTournamentStatistics_WhenSortByInvalid_ReturnsBadRequest()
     {
         var result = await _controller.GetTournamentStatistics("test", null);
@@ -61,6 +70,30 @@ public class PokemonControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result);
         var statistics = Assert.IsAssignableFrom<IEnumerable<PokemonDTO>>(okResult.Value);
         Assert.Single(statistics);
+    }
+
+    [Fact]
+    public async Task GetTournamentStatistics_WhenSortDirectionIsMissing_UsesAscending()
+    {
+        _tournamentServiceMock
+            .Setup(s => s.GetTournamentResultsAsync(SortOptions.Name, SortDirection.Asc))
+            .ReturnsAsync(new List<Pokemon>());
+
+        var result = await _controller.GetTournamentStatistics("name", null);
+
+        Assert.IsType<OkObjectResult>(result);
+        _tournamentServiceMock.Verify(
+            s => s.GetTournamentResultsAsync(SortOptions.Name, SortDirection.Asc),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task GetTournamentStatistics_WhenSortByIsUndefinedNumericValue_ReturnsBadRequest()
+    {
+        var result = await _controller.GetTournamentStatistics("99", null);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal("sortBy parameter is invalid", GetErrorMessage(badRequest.Value));
     }
 
     private static string? GetErrorMessage(object? value) =>

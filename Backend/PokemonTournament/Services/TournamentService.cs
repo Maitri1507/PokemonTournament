@@ -1,8 +1,7 @@
 ﻿using PokemonTournament.Enums;
 using PokemonTournament.Infrastructure;
 using PokemonTournament.Models;
-using System;
-using System.Numerics;
+using Microsoft.Extensions.Options;
 
 namespace PokemonTournament.Services
 {
@@ -10,30 +9,50 @@ namespace PokemonTournament.Services
     {
         private readonly IBattleService _battleService;
         private readonly IPokeClient _pokeClient;
-
-        private const int Total = 16;
-        private const int MinPokemonId = 1;
-        private const int MaxPokemonId = 151;
+        private readonly TournamentOptions _options;
 
 
-        public TournamentService(IBattleService battleService, IPokeClient pokeClient)
+        public TournamentService(
+            IBattleService battleService,
+            IPokeClient pokeClient,
+            IOptions<TournamentOptions> options)
         {
             _battleService = battleService;
             _pokeClient = pokeClient;
+            _options = options.Value;
+
+            if (_options.MinPokemonId < 1 ||
+                _options.MaxPokemonId < _options.MinPokemonId ||
+                _options.DefaultParticipantCount < 2 ||
+                _options.DefaultParticipantCount > _options.MaxPokemonId - _options.MinPokemonId + 1 ||
+                _options.MaxConcurrentRequests < 1)
+            {
+                throw new ArgumentException("Tournament configuration is invalid.");
+            }
         }
 
-        public async Task<List<Pokemon>> GetTournamentResultsAsync(SortOptions sortOption, SortDirection sortDirection)
+        public async Task<List<Pokemon>> GetTournamentResultsAsync(
+            SortOptions sortOption,
+            SortDirection sortDirection)
         {
-            // Generate 16 random ids from the given range
-            var ids = Enumerable.Range(MinPokemonId, MaxPokemonId);
-            var randomIds = ids.OrderBy(_ => Random.Shared.Next()).Take(Total).ToList();
+            var randomIds = SelectRandomIds();
 
             // Get the json from API to fetch pokemons
-            var tasks = randomIds.Select(id => _pokeClient.GetPokemonAsync(id));
-            var apiResponses = await Task.WhenAll(tasks);
+            var responses = new List<PokemonAPIResponse>(randomIds.Count);
+            await Parallel.ForEachAsync(
+                randomIds,
+                new ParallelOptions { MaxDegreeOfParallelism = _options.MaxConcurrentRequests },
+                async (id, cancellationToken) =>
+                {
+                    var response = await _pokeClient.GetPokemonAsync(id);
+                    lock (responses)
+                    {
+                        responses.Add(response);
+                    }
+                });
 
             // Convert to DTO
-            var roaster = apiResponses.Select(response => ConvertToPokemon(response)).ToList();
+            var roaster = responses.Select(response => ConvertToPokemon(response)).ToList();
 
             // Generate tournament internally
             RunRoundRobin(roaster);
@@ -44,6 +63,21 @@ namespace PokemonTournament.Services
         }
 
         #region private methods
+
+        private List<int> SelectRandomIds()
+        {
+            var ids = Enumerable.Range(
+                _options.MinPokemonId,
+                _options.MaxPokemonId - _options.MinPokemonId + 1).ToArray();
+
+            for (var index = 0; index < _options.DefaultParticipantCount; index++)
+            {
+                var swapIndex = Random.Shared.Next(index, ids.Length);
+                (ids[index], ids[swapIndex]) = (ids[swapIndex], ids[index]);
+            }
+
+            return ids.Take(_options.DefaultParticipantCount).ToList();
+        }
 
         private void RunRoundRobin(IList<Pokemon> roster)
         {

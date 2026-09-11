@@ -13,7 +13,10 @@ export class TournamentService {
 
     constructor(private http: HttpClient) {}
 
-    getTournamentStatistics(sortBy: SortOptions, sortDirection: SortDirection): Observable<Pokemon[]> {
+    getTournamentStatistics(
+        sortBy: SortOptions,
+        sortDirection: SortDirection
+    ): Observable<Pokemon[]> {
         const params = new HttpParams()
             .set('sortBy', sortBy)
             .set('sortDirection', sortDirection);

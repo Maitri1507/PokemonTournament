@@ -34,7 +34,8 @@ namespace PokemonTournament.Controllers
             }
 
             // verify the sortBy parameter is a valid SortOptions enum value
-            if (!Enum.TryParse(sortBy, true, out SortOptions sortField))
+            if (!Enum.TryParse(sortBy, true, out SortOptions sortField) ||
+                !Enum.IsDefined(typeof(SortOptions), sortField))
             {
                 return BadRequest(new { error = "sortBy parameter is invalid" });
             }
@@ -62,7 +63,9 @@ namespace PokemonTournament.Controllers
             }
 
             // call the tournament service
-            var roster = await _tournamentService.GetTournamentResultsAsync(sortField, direction.Value);
+            var roster = await _tournamentService.GetTournamentResultsAsync(
+                sortField,
+                direction.Value);
 
             // convert the result to DTOs for frontend
             var result = roster.Select(p => new PokemonDTO(p.Id, p.Name, p.Type, p.Wins, p.Losses, p.Ties));

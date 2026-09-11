@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
   imports: [FormsModule, IndividualCardsComponent, CommonModule],
   standalone: true,
   templateUrl: './tournament-page.component.html',
-  styleUrls: ['./tournament-page.component.scss']
+  styleUrls: ['./tournament-page.component.css']
 })
 export class TournamentPageComponent implements OnInit {
 
@@ -27,6 +27,7 @@ export class TournamentPageComponent implements OnInit {
   currentPage = 1;
 
   errorMessage: string | null = null;
+  isLoading = false;
 
   directionLabels: Record<string, string> = {
   asc: 'Ascending',
@@ -42,16 +43,21 @@ export class TournamentPageComponent implements OnInit {
 
   loadData(): void {
     this.errorMessage = null;
+    this.isLoading = true;
 
-    this.tournamentService.getTournamentStatistics(this.sortBy, this.sortDirection)
+    this.tournamentService.getTournamentStatistics(
+      this.sortBy,
+      this.sortDirection)
       .subscribe({
         next: (data) => {
           this.total = data;
           this.currentPage = 1;
           this.updatePage();
+          this.isLoading = false;
         },
         error: () => {
           this.errorMessage = 'Unable to load tournament statistics.';
+          this.isLoading = false;
         }
       });
   }
