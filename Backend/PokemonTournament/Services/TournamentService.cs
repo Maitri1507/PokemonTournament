@@ -2,6 +2,8 @@
 using PokemonTournament.Infrastructure;
 using PokemonTournament.Models;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging.Abstractions;
+using System.Diagnostics;
 
 namespace PokemonTournament.Services
 {
@@ -10,16 +12,23 @@ namespace PokemonTournament.Services
         private readonly IBattleService _battleService;
         private readonly IPokeClient _pokeClient;
         private readonly TournamentOptions _options;
+        private readonly ILogger<TournamentService> _logger;
+        private readonly IAlertService _alertService;
 
 
         public TournamentService(
             IBattleService battleService,
             IPokeClient pokeClient,
-            IOptions<TournamentOptions> options)
+            IOptions<TournamentOptions> options,
+            ILogger<TournamentService>? logger = null,
+            IAlertService? alertService = null)
         {
             _battleService = battleService;
             _pokeClient = pokeClient;
             _options = options.Value;
+            _logger = logger ?? NullLogger<TournamentService>.Instance;
+            _alertService = alertService ?? new LoggingAlertService(
+                NullLogger<LoggingAlertService>.Instance);
 
             if (_options.MinPokemonId < 1 ||
                 _options.MaxPokemonId < _options.MinPokemonId ||
@@ -35,6 +44,7 @@ namespace PokemonTournament.Services
             SortOptions sortOption,
             SortDirection sortDirection)
         {
+            var stopwatch = Stopwatch.StartNew();
             var randomIds = SelectRandomIds();
 
             // Get the json from API to fetch pokemons
@@ -64,17 +74,26 @@ namespace PokemonTournament.Services
                         else
                         {
                             stopProcessing = true;
+                            _alertService.Raise(
+                                "PokeAPI returned an incomplete response.",
+                                new InvalidOperationException($"Pokemon {id} was missing data."));
                         }
                     }
-                    catch
+                    catch (Exception exception)
                     {
                         stopProcessing = true;
+                        _alertService.Raise($"PokeAPI request failed for Pokemon {id}.", exception);
                     }
                 });
 
             // If something failed then return null so controller can decide
             if (stopProcessing || responses.Count != randomIds.Count)
             {
+                _logger.LogWarning(
+                    "Tournament failed after {ElapsedMilliseconds} ms. Requested {RequestedCount} Pokemon and received {ResponseCount}.",
+                    stopwatch.ElapsedMilliseconds,
+                    randomIds.Count,
+                    responses.Count);
                 return null;
             }
 
@@ -86,6 +105,10 @@ namespace PokemonTournament.Services
             
             // give result based on sorting
             var sortedResult = Sort(roaster, sortOption, sortDirection).ToList();
+            _logger.LogInformation(
+                "Tournament completed in {ElapsedMilliseconds} ms for {ParticipantCount} Pokemon.",
+                stopwatch.ElapsedMilliseconds,
+                sortedResult.Count);
             return sortedResult;
         }
 

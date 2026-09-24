@@ -3,6 +3,8 @@
 using PokemonTournament.Infrastructure;
 using PokemonTournament.Models;
 using PokemonTournament.Services;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,9 @@ builder.Services.AddOptions<TournamentOptions>()
 builder.Services.AddHttpClient<IPokeClient, PokeClient>();
 builder.Services.AddScoped<IBattleService, BattleService>();
 builder.Services.AddScoped<ITournamentService, TournamentService>();
+builder.Services.AddScoped<IAlertService, LoggingAlertService>();
+builder.Services.AddHealthChecks()
+    .AddCheck<PokeApiHealthCheck>("pokeapi", tags: new[] { "ready", "dependency" });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -32,6 +37,27 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+        logger.LogError(
+            exception,
+            "Unhandled exception while processing {RequestMethod} {RequestPath}.",
+            context.Request.Method,
+            context.Request.Path);
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await Results.Problem(
+            statusCode: StatusCodes.Status500InternalServerError,
+            title: "An unexpected error occurred.")
+            .ExecuteAsync(context);
+    });
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -45,5 +71,10 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
 
 app.Run();

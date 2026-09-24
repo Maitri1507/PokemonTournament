@@ -1,0 +1,16 @@
+<main class="error-page" aria-labelledby="error-title">
+  <div class="error-art" aria-hidden="true">
+    <div class="signal signal-one"></div>
+    <div class="signal signal-two"></div>
+    <div class="error-orb">!</div>
+  </div>
+
+  <p class="error-code">SYSTEM PAUSED</p>
+  <h1 id="error-title">Something went wrong</h1>
+  <p class="error-copy">
+    The tournament could not be loaded right now. Give it another try in a moment.
+  </p>
+  <button class="retry-button" type="button" (click)="tryAgain()">
+    Try again
+  </button>
+</main>

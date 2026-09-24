@@ -4,6 +4,7 @@ import { Pokemon, SortDirection, SortOptions } from '../../models/pokemon.model'
 import { FormsModule } from '@angular/forms';
 import { IndividualCardsComponent } from '../individual-cards/individual-cards.component';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-tournament-page',
@@ -35,7 +36,9 @@ export class TournamentPageComponent implements OnInit {
 };
 
 
-  constructor(private tournamentService: TournamentService) {}
+  constructor(
+    private tournamentService: TournamentService,
+    private router: Router) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -55,9 +58,13 @@ export class TournamentPageComponent implements OnInit {
           this.updatePage();
           this.isLoading = false;
         },
-        error: () => {
+        error: (error) => {
           this.errorMessage = 'Unable to load tournament statistics.';
           this.isLoading = false;
+          console.error('Tournament statistics request failed.', error);
+          this.router.navigate(['/error'], {
+            state: { returnUrl: '/' }
+          });
         }
       });
   }
