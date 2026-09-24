@@ -1,1 +1,29 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+	--ink: #1d2935;
+	--muted-ink: #68747c;
+	--paper: #f7f3ec;
+	--surface: #fffdf8;
+	--line: #e7dfd3;
+	--coral: #e76f51;
+	--teal: #2a9d8f;
+	--gold: #e9a23b;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	min-width: 320px;
+	margin: 0;
+	background: var(--paper);
+	color: var(--ink);
+	font-family: 'DM Sans', 'Trebuchet MS', sans-serif;
+}
+
+button,
+select {
+	font: inherit;
+}

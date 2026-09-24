@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TournamentService } from '../../services/tournament.service';
 import { Pokemon, SortDirection, SortOptions } from '../../models/pokemon.model';
+import { getURL, getWinRate } from '../../helpers/tournament.helper';
 import { FormsModule } from '@angular/forms';
 import { IndividualCardsComponent } from '../individual-cards/individual-cards.component';
 import { CommonModule } from '@angular/common';
@@ -34,6 +35,18 @@ export class TournamentPageComponent implements OnInit {
   asc: 'Ascending',
   desc: 'Descending'
 };
+
+  get battleSpotlight(): Pokemon[] {
+    return [...this.total]
+      .sort((first, second) =>
+        getWinRate(second.wins, second.losses, second.ties) -
+        getWinRate(first.wins, first.losses, first.ties))
+      .slice(0, 2);
+  }
+
+  getPokemonImage(id: number): string {
+    return getURL(id);
+  }
 
 
   constructor(

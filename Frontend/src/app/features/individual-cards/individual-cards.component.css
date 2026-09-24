@@ -1,0 +1,54 @@
+.card {
+	height: 100%;
+	border: 1px solid var(--line);
+	border-radius: 1rem;
+	background: var(--surface);
+	box-shadow: 0 0.5rem 1.25rem rgba(90, 70, 44, 0.06);
+	transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.card:hover {
+	transform: translateY(-0.3rem);
+	box-shadow: 0 1rem 2rem rgba(90, 70, 44, 0.12);
+}
+
+.card-body {
+	display: flex;
+	flex-direction: column;
+	padding: 1.25rem;
+}
+
+.card-title {
+	font-family: 'Space Grotesk', 'Trebuchet MS', sans-serif;
+	font-size: 1.25rem;
+}
+
+.card img {
+	width: 5rem !important;
+	height: 5rem !important;
+	object-fit: contain;
+	filter: drop-shadow(0 0.5rem 0.4rem rgba(29, 41, 53, 0.14));
+}
+
+.badge {
+	padding: 0.4rem 0.65rem;
+	font-size: 0.68rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.card .bg-light {
+	background: #f4efe7 !important;
+	border-radius: 0.55rem !important;
+}
+
+.card .progress {
+	height: 0.45rem;
+	background: #eee7dc;
+	border-radius: 1rem;
+}
+
+.card .progress-bar {
+	background: var(--teal) !important;
+	border-radius: inherit;
+}
