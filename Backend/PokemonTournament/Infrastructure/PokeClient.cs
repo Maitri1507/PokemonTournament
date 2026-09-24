@@ -14,10 +14,10 @@ namespace PokemonTournament.Infrastructure
             ?? throw new InvalidOperationException("APIURL:BaseUrl is not configured.");
         }
 
-        public async Task<PokemonAPIResponse> GetPokemonAsync(int id)
+        public async Task<PokemonAPIResponse?> GetPokemonAsync(int id)
         {
             var response = await _httpClient.GetFromJsonAsync<PokemonAPIResponse>($"{_baseURL}/{id}");
-            return response ?? throw new InvalidOperationException($"PokeAPI returned no data for pokemon id {id}.");
+            return response;
         }
     }
 }

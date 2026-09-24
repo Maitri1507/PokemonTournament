@@ -1,0 +1,36 @@
+.tournament-page {
+	min-width: 0;
+}
+
+.tournament-intro,
+.sort-panel {
+	background-color: #fff;
+}
+
+.tournament-intro p {
+	margin-inline: auto;
+	max-width: 42rem;
+}
+
+.sort-panel .form-label,
+.sort-panel .form-select {
+	width: min(100%, 250px);
+}
+
+.page-size-control .form-select {
+	min-width: 0;
+}
+
+@media (max-width: 575.98px) {
+	.tournament-intro p {
+		font-size: 0.95rem;
+	}
+
+	.pagination-controls .btn {
+		min-width: 44px;
+	}
+
+	.pagination-controls span {
+		display: none;
+	}
+}

@@ -39,17 +39,44 @@ namespace PokemonTournament.Services
 
             // Get the json from API to fetch pokemons
             var responses = new List<PokemonAPIResponse>(randomIds.Count);
+
+            bool stopProcessing = false;
+
             await Parallel.ForEachAsync(
                 randomIds,
                 new ParallelOptions { MaxDegreeOfParallelism = _options.MaxConcurrentRequests },
                 async (id, cancellationToken) =>
                 {
-                    var response = await _pokeClient.GetPokemonAsync(id);
-                    lock (responses)
+                    if (stopProcessing)
+                        return;
+
+                    try
                     {
-                        responses.Add(response);
+                        var response = await _pokeClient.GetPokemonAsync(id);
+
+                        if (response != null && response.Types != null)
+                        {
+                            lock (responses)
+                            {
+                                responses.Add(response);
+                            }
+                        }
+                        else
+                        {
+                            stopProcessing = true;
+                        }
+                    }
+                    catch
+                    {
+                        stopProcessing = true;
                     }
                 });
+
+            // If something failed then return null so controller can decide
+            if (stopProcessing || responses.Count != randomIds.Count)
+            {
+                return null;
+            }
 
             // Convert to DTO
             var roaster = responses.Select(response => ConvertToPokemon(response)).ToList();
@@ -66,9 +93,7 @@ namespace PokemonTournament.Services
 
         private List<int> SelectRandomIds()
         {
-            var ids = Enumerable.Range(
-                _options.MinPokemonId,
-                _options.MaxPokemonId - _options.MinPokemonId + 1).ToArray();
+            var ids = Enumerable.Range( _options.MinPokemonId,_options.MaxPokemonId - _options.MinPokemonId + 1).ToArray();
 
             for (var index = 0; index < _options.DefaultParticipantCount; index++)
             {
@@ -78,6 +103,20 @@ namespace PokemonTournament.Services
 
             return ids.Take(_options.DefaultParticipantCount).ToList();
         }
+
+        //private List<int> SelectRandomIds()
+        //{
+        //    var ids = new HashSet<int>();
+
+        //    while (ids.Count < _options.DefaultParticipantCount)
+        //    {
+        //        int id = Random.Shared.Next(_options.MinPokemonId, _options.MaxPokemonId + 1);
+        //        ids.Add(id); 
+        //    }
+
+        //    return ids.ToList();
+        //}
+
 
         private void RunRoundRobin(IList<Pokemon> roster)
         {

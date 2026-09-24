@@ -1,29 +1,27 @@
-<div class="container py-4">
+<div class="container tournament-page py-3 py-md-4">
 
 
-<div class="text-center mb-4 pb-3 border rounded">
-  <h2 class="fw-bold mt-4">Pokémon League</h2>
-  <p class="text-muted">
-    Explore performance statistics from the latest Pokémon <br> 
-    tournament.Sort by different metrics to see who's leading the <br>
-     competition.
+<div class="tournament-intro text-center mb-4 p-3 p-md-4 border rounded">
+  <h2 class="fw-bold mb-2">Pokémon League</h2>
+  <p class="text-muted mb-0">
+    Explore performance statistics from the latest Pokémon tournament. Sort by
+    different metrics to see who's leading the competition.
   </p>
 </div>
 
 
-<div class="mb-3 border rounded">
+<div class="sort-panel mb-3 p-3 border rounded">
 
-  <div class="row justify-content-center mb-3 mt-3">
+  <div class="row justify-content-center g-3">
 
     <div class="col-12 col-md-4 text-center">
-      <label class="form-label d-block text-start mx-auto" style="max-width: 250px;">
+      <label class="form-label d-block text-start mx-auto">
         Sort by
       </label>
 
       <select [(ngModel)]="sortBy"
               (change)="changeSort()"
-              class="form-select mx-auto"
-              style="max-width: 250px;">
+              class="form-select mx-auto">
         <option *ngFor="let opt of sortOptionsList" [value]="opt">
           {{ opt | titlecase }}
         </option>
@@ -31,14 +29,13 @@
     </div>
 
     <div class="col-12 col-md-4 text-center">
-      <label class="form-label d-block text-start mx-auto" style="max-width: 250px;">
+      <label class="form-label d-block text-start mx-auto">
         Direction
       </label>
 
       <select [(ngModel)]="sortDirection"
               (change)="changeSort()"
-              class="form-select mx-auto"
-              style="max-width: 250px;">
+              class="form-select mx-auto">
         <option *ngFor="let dir of sortDirectionList" [value]="dir">
           {{ directionLabels[dir] }}
         </option>
@@ -55,7 +52,7 @@
 </div>
 
 
-  <div class="col-12 col-md-2 mb-3 ms-auto text-start">
+  <div class="page-size-control col-12 col-md-3 col-lg-2 mb-3 ms-auto text-start">
       <label class="form-label">Items per page</label>
       <select [(ngModel)]="pageSize" (change)="changePageSize()" class="form-select">
         <option *ngFor="let size of [4, 8, 16]" [ngValue]="size">
@@ -72,14 +69,14 @@
   </div>
 
 
-  <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
-    <button class="btn btn-outline-secondary" (click)="prevPage()">‹ Previous</button>
+  <div class="pagination-controls d-flex justify-content-center align-items-center gap-2 gap-sm-3 mt-4">
+    <button class="btn btn-outline-secondary" (click)="prevPage()">‹ <span>Previous</span></button>
 
     <span class="fw-bold">
       {{ currentPage }} / {{ total.length / pageSize | number:'1.0-0' }}
     </span>
 
-    <button class="btn btn-outline-secondary" (click)="nextPage()">Next ›</button>
+    <button class="btn btn-outline-secondary" (click)="nextPage()"><span>Next</span> ›</button>
   </div>
 
   <p class="text-center text-muted mt-3 small">

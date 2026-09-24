@@ -67,6 +67,11 @@ namespace PokemonTournament.Controllers
                 sortField,
                 direction.Value);
 
+            if (roster == null)
+            {
+                return StatusCode(503, "PokeAPI is unavailable. Please try again later.");
+            }
+
             // convert the result to DTOs for frontend
             var result = roster.Select(p => new PokemonDTO(p.Id, p.Name, p.Type, p.Wins, p.Losses, p.Ties));
 
